@@ -5,6 +5,7 @@ from esphome.const import UNIT_MICROGRAMS_PER_CUBIC_METER, ICON_CHEMICAL_WEAPON
 
 DEPENDENCIES = ["uart"]
 
+# 命名空间对应 sy210.cpp 里的 namespace esphome::sy210
 sy210_ns = cg.esphome_ns.namespace("sy210")
 SY210Sensor = sy210_ns.class_("SY210Sensor", cg.PollingComponent, uart.UARTDevice)
 
@@ -20,6 +21,10 @@ CONFIG_SCHEMA = sensor.sensor_schema(
 )
 
 async def to_code(config):
-    var = cg.new_Pvariable(config[cv.GenerateID()], await cg.get_variable(config["uart_id"]))
+    # 创建 C++ 对象
+    uart_var = await cg.get_variable(config["uart_id"])
+    var = cg.new_Pvariable(config[cv.GenerateID()], uart_var)
+
+    # 注册组件
     await cg.register_component(var, config)
     await sensor.register_sensor(var.pm25_sensor, config)
