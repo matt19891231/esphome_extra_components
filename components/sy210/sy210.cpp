@@ -14,9 +14,9 @@ class SY210Sensor : public PollingComponent, public uart::UARTDevice {
   }
 
   void update() override {
-    while (available() >= 5) {
+    while (this->available() >= 5) {
       uint8_t buf[5];
-      read_array(buf, 5);
+      this->read_array(buf, 5);
 
       ESP_LOGD("sy210", "Raw frame: %02X %02X %02X %02X %02X",
                buf[0], buf[1], buf[2], buf[3], buf[4]);
@@ -32,7 +32,7 @@ class SY210Sensor : public PollingComponent, public uart::UARTDevice {
                    buf[4], checksum);
         }
       } else {
-        flush();
+        this->flush();
       }
     }
   }
