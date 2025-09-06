@@ -1,10 +1,17 @@
-#include "esphome.h"
+#include "esphome/core/component.h"
+#include "esphome/components/uart/uart.h"
+#include "esphome/components/sensor/sensor.h"
 
-class SY210Sensor : public PollingComponent, public UARTDevice {
+namespace esphome {
+namespace sy210 {
+
+class SY210Sensor : public PollingComponent, public uart::UARTDevice {
  public:
-  Sensor *pm25_sensor = new Sensor();
+  sensor::Sensor *pm25_sensor;
 
-  SY210Sensor(UARTComponent *parent) : PollingComponent(1000), UARTDevice(parent) {}
+  SY210Sensor(uart::UARTComponent *parent) : uart::UARTDevice(parent) {
+    pm25_sensor = new sensor::Sensor();
+  }
 
   void update() override {
     while (available() >= 5) {
@@ -19,7 +26,7 @@ class SY210Sensor : public PollingComponent, public UARTDevice {
         uint8_t checksum = (buf[0] + buf[1] + buf[2] + buf[3]) & 0xFF;
 
         if (checksum == buf[4]) {
-          pm25_sensor->publish_state(value);
+          this->pm25_sensor->publish_state(value);
         } else {
           ESP_LOGW("sy210", "Checksum error: got %02X expect %02X",
                    buf[4], checksum);
@@ -30,3 +37,6 @@ class SY210Sensor : public PollingComponent, public UARTDevice {
     }
   }
 };
+
+}  // namespace sy210
+}  // namespace esphome
