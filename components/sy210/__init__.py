@@ -34,7 +34,7 @@ CONFIG_SCHEMA = cv.Schema({
         unit_of_measurement=UNIT_MICROGRAMS_PER_CUBIC_METER,
         icon=ICON_CHEMICAL_WEAPON,
         accuracy_decimals=0,
-        device_class=DEVICE_CLASS_PM25,  # ESPHome uses PM25 class for all PM sensors
+        device_class=DEVICE_CLASS_PM25,
         state_class=STATE_CLASS_MEASUREMENT,
     ),
     cv.Optional(CONF_PM1_0): sensor.sensor_schema(
@@ -48,6 +48,11 @@ CONFIG_SCHEMA = cv.Schema({
 
 
 async def to_code(config):
+    # 添加头文件包含
+    cg.add_include_list([
+        "sy210/sy210.h"
+    ])
+    
     # 创建 C++ 对象
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
